@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import { useImportStore } from '../stores/import.store';
 import type { CsvPreviewRow } from '../types/csv';
+import { CopyCsvTemplateBtn } from '../components/ui/CopyCsvTemplateBtn';
+import { DownloadTemplateBtn } from '../components/ui/DownloadTemplateBtn';
 
 export function ImportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -78,6 +80,13 @@ export function ImportPage() {
               <p style={{ fontWeight: 600, margin: '0 0 4px 0' }}>التنسيق المطلوب (CSV):</p>
               <p dir="ltr" style={{ fontFamily: 'monospace', fontSize: '0.8125rem', margin: 0 }}>المستوى; المادة; السؤال; اختيار1; اختيار2; اختيار3; اختيار4; الإجابة; شرح; صورة; المدة</p>
             </div>
+          </div>
+        )}
+
+        {formatTab === 'csv' && (
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <DownloadTemplateBtn />
+            <CopyCsvTemplateBtn />
           </div>
         )}
 

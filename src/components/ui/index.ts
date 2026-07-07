@@ -8,3 +8,4 @@ export { Feedback } from './Feedback';
 export { QuizOption } from './QuizOption';
 export { ThemeToggle } from './ThemeToggle';
 export { DownloadTemplateBtn } from './DownloadTemplateBtn';
+export { CopyCsvTemplateBtn } from './CopyCsvTemplateBtn';
