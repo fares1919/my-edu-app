@@ -5,6 +5,7 @@ import { ProfilesPage } from '../pages/ProfilesPage';
 import { ExamsPage } from '../pages/ExamsPage';
 import { QuizPage } from '../pages/QuizPage';
 import { ResultPage } from '../pages/ResultPage';
+import { ReviewPage } from '../pages/ReviewPage';
 import { StatsPage } from '../pages/StatsPage';
 import { MedalsPage } from '../pages/MedalsPage';
 import { QuizManagePage } from '../pages/QuizManagePage';
@@ -25,6 +26,7 @@ export function AppRouter() {
       <Route path="/exams/:level/:subject" element={<ExamsPage />} />
       <Route path={ROUTES.QUIZ(':quizId')} element={<QuizPage />} />
       <Route path={ROUTES.RESULT(':sessionId')} element={<ResultPage />} />
+      <Route path={ROUTES.REVIEW(':sessionId')} element={<ReviewPage />} />
       <Route path={ROUTES.STATS} element={<StatsPage />} />
       <Route path="/quiz-manage" element={<QuizManagePage />} />
       <Route path={ROUTES.MEDALS} element={<MedalsPage />} />

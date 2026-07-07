@@ -1,0 +1,89 @@
+/* ══════════════════════════════════════════════════
+   ANIMATIONS — ScoreCircle, ResultPage, and more
+   ══════════════════════════════════════════════════ */
+
+/* ---- Fade In ---- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ---- Slide Up ---- */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Scale In ---- */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---- Spin (existing) ---- */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Circle Progress (draw arc) ---- */
+@keyframes circleProgress {
+  from { stroke-dashoffset: var(--circle-circumference); }
+  to   { stroke-dashoffset: var(--circle-target-offset); }
+}
+
+/* ---- Count Up (for AnimatedNumber) ---- */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Confetti / Particle burst ---- */
+@keyframes confettiFall {
+  0%   { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+@keyframes confettiDrift {
+  0%   { transform: translateX(0px) translateY(-10vh) rotate(0deg); opacity: 1; }
+  50%  { transform: translateX(40px) translateY(50vh) rotate(360deg); opacity: 0.7; }
+  100% { transform: translateX(-20px) translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ---- Pulse (for emphasis) ---- */
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* ---- Circle SVG Progress (for the arc draw) ---- */
+@keyframes drawCircle {
+  from { stroke-dashoffset: var(--circle-max-offset, 565.48); }
+  to   { stroke-dashoffset: var(--circle-target); }
+}
+
+/* ---- Staggered entrance classes ---- */
+.stagger-1 { animation: slideUp 0.4s ease-out both; animation-delay: 0.05s; }
+.stagger-2 { animation: slideUp 0.4s ease-out both; animation-delay: 0.15s; }
+.stagger-3 { animation: slideUp 0.4s ease-out both; animation-delay: 0.25s; }
+.stagger-4 { animation: slideUp 0.4s ease-out both; animation-delay: 0.35s; }
+.stagger-5 { animation: slideUp 0.4s ease-out both; animation-delay: 0.45s; }
+.stagger-6 { animation: slideUp 0.4s ease-out both; animation-delay: 0.55s; }
+
+/* ---- Score circle fill animation (used via CSS custom properties) ---- */
+@keyframes fillCircle {
+  from { stroke-dashoffset: 314.159; }
+  to   { stroke-dashoffset: 0; }
+}

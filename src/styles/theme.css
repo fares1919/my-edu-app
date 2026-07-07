@@ -1,11 +1,205 @@
 /* ══════════════════════════════════════════════════
-   THEME CSS — Délégué à globals.css (design system complet)
-   
-   Tous les tokens sémantiques, les thèmes (clair/sombre/
-   contraste renforcé) et les classes de composants sont
-   désormais dans src/styles/globals.css.
-   
-   Ce fichier est conservé pour compatibilité.
+   THEME SYSTEM — Smooth transitions & ThemeToggle
    ══════════════════════════════════════════════════ */
 
-/* Design system complet dans globals.css */
+/* ─── Smooth Theme Switching ─────────────────────── */
+
+/*
+  Universal color transitions for seamless light ↔ dark switch.
+  Elements with explicit `transition` rules (btn, card, input, etc.)
+  keep their own timings via higher specificity.
+  This fallback ensures structural/inline-styled elements animate smoothly.
+*/
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.35s;
+  transition-timing-function: ease;
+}
+
+/*
+  Restore component-level transition values so fast hover/active effects
+  are not slowed by the universal fallback.
+  Target only interactive / animated components, not their children.
+*/
+.btn,
+.btn-icon,
+.btn-ghost {
+  transition-property: all;
+}
+
+.input {
+  transition-property: border-color, box-shadow;
+}
+
+.card {
+  transition-property: box-shadow, transform, background-color, border-color;
+}
+
+.quiz-option {
+  transition-property: all;
+}
+
+.quiz-option-marker {
+  transition-property: all;
+}
+
+.progress-fill {
+  transition-property: width, background-color;
+}
+
+/* Override for reduced-motion / accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+[data-animations='disabled'] *,
+[data-animations='disabled'] *::before,
+[data-animations='disabled'] *::after {
+  transition-duration: 0.01ms !important;
+}
+
+/* ══════════════════════════════════════════════════
+   THEMETOGGLE COMPONENT
+   ══════════════════════════════════════════════════ */
+
+.theme-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-toggle:hover {
+  background: var(--nav-hover-bg);
+  color: var(--accent-primary);
+  box-shadow: 0 0 0 4px var(--nav-hover-bg);
+}
+
+.theme-toggle:active {
+  transform: scale(0.92);
+}
+
+.theme-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.theme-toggle[data-pressed='true'] .theme-toggle__icon {
+  transform: rotate(360deg);
+}
+
+/* ─── Icon wrapper ───────────────────────────────── */
+
+.theme-toggle__icon {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Both icons share the same position & cross-fade */
+.theme-toggle__icon svg {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  transition:
+    opacity 0.4s ease,
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─── Sun icon ──────────────────────────────────── */
+
+.theme-toggle__sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+[data-theme='dark'] .theme-toggle__sun,
+[data-theme='high-contrast'] .theme-toggle__sun {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
+}
+
+/* ─── Moon icon ─────────────────────────────────── */
+
+.theme-toggle__moon {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+
+[data-theme='dark'] .theme-toggle__moon,
+[data-theme='high-contrast'] .theme-toggle__moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+/* ─── Sizes ─────────────────────────────────────── */
+
+.theme-toggle--sm {
+  width: 36px;
+  height: 36px;
+}
+
+.theme-toggle--sm .theme-toggle__icon {
+  width: 18px;
+  height: 18px;
+}
+
+.theme-toggle--sm .theme-toggle__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.theme-toggle--lg {
+  width: 48px;
+  height: 48px;
+}
+
+.theme-toggle--lg .theme-toggle__icon {
+  width: 26px;
+  height: 26px;
+}
+
+.theme-toggle--lg .theme-toggle__icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* ─── Glass variant ─────────────────────────────── */
+
+.theme-toggle--glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.theme-toggle--glass:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme='dark'] .theme-toggle--glass {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .theme-toggle--glass:hover {
+  background: rgba(0, 0, 0, 0.3);
+}

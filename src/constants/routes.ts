@@ -8,6 +8,7 @@ export const ROUTES = {
   EXAM_BY_SUBJECT: (level: string, subject: string) => `/exams/${level}/${subject}`,
   QUIZ: (quizId: string) => `/quiz/${quizId}`,
   RESULT: (sessionId: string) => `/result/${sessionId}`,
+  REVIEW: (sessionId: string) => `/review/${sessionId}`,
   STATS: '/stats',
   MEDALS: '/medals',
   IMPORT: '/import',

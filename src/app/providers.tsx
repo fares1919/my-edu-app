@@ -5,6 +5,7 @@ import { useUiStore } from '../stores/ui.store';
 import { getDb } from '../services/db/db';
 import { seedSubjectsIfEmpty } from '../services/db/repositories/subjects.repo';
 import { useProfilesStore } from '../stores/profiles.store';
+import { ThemeProvider } from '../components/providers/ThemeProvider';
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -15,7 +16,7 @@ export function AppProviders({ children }: AppProvidersProps) {
   const setInitState = useAppStore((s) => s.setInitState);
   const loadActiveProfile = useProfilesStore((s) => s.loadActiveProfile);
   const loadProfiles = useProfilesStore((s) => s.loadProfiles);
-  const { theme, fontSize, animationsEnabled } = useUiStore();
+  const { fontSize, animationsEnabled } = useUiStore();
 
   useEffect(() => {
     async function initApp() {
@@ -23,7 +24,7 @@ export function AppProviders({ children }: AppProvidersProps) {
       try {
         // Initialiser la base de données
         await getDb();
-        // Pré-remplir les matières si vide
+        // Pré-remplir les matières si empty
         await seedSubjectsIfEmpty();
         // Charger le profil actif
         await loadActiveProfile();
@@ -52,11 +53,7 @@ export function AppProviders({ children }: AppProvidersProps) {
     };
   }, []);
 
-  // Appliquer les préférences
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
+  // Appliquer les préférences (hors theme — géré par useTheme/ThemeProvider)
   useEffect(() => {
     document.documentElement.setAttribute('data-font', fontSize);
   }, [fontSize]);
@@ -65,5 +62,9 @@ export function AppProviders({ children }: AppProvidersProps) {
     document.documentElement.setAttribute('data-animations', animationsEnabled ? 'enabled' : 'disabled');
   }, [animationsEnabled]);
 
-  return <>{children}</>;
+  return (
+    <ThemeProvider>
+      {children}
+    </ThemeProvider>
+  );
 }

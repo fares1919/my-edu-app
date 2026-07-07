@@ -6,3 +6,4 @@ export { ProgressBar } from './ProgressBar';
 export { Timer } from './Timer';
 export { Feedback } from './Feedback';
 export { QuizOption } from './QuizOption';
+export { ThemeToggle } from './ThemeToggle';
