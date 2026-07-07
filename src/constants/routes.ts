@@ -1,0 +1,16 @@
+export const ROUTES = {
+  HOME: '/',
+  PROFILES: '/profiles',
+  PROFILE_NEW: '/profiles/new',
+  PROFILE_EDIT: (id: string) => `/profiles/${id}/edit`,
+  EXAMS: '/exams',
+  EXAM_BY_LEVEL: (level: string) => `/exams/${level}`,
+  EXAM_BY_SUBJECT: (level: string, subject: string) => `/exams/${level}/${subject}`,
+  QUIZ: (quizId: string) => `/quiz/${quizId}`,
+  RESULT: (sessionId: string) => `/result/${sessionId}`,
+  STATS: '/stats',
+  MEDALS: '/medals',
+  IMPORT: '/import',
+  EXPORT: '/export',
+  SETTINGS: '/settings',
+} as const;

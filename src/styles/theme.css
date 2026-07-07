@@ -1,0 +1,11 @@
+/* ══════════════════════════════════════════════════
+   THEME CSS — Délégué à globals.css (design system complet)
+   
+   Tous les tokens sémantiques, les thèmes (clair/sombre/
+   contraste renforcé) et les classes de composants sont
+   désormais dans src/styles/globals.css.
+   
+   Ce fichier est conservé pour compatibilité.
+   ══════════════════════════════════════════════════ */
+
+/* Design system complet dans globals.css */

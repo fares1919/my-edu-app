@@ -1,0 +1,58 @@
+/* ══════════════════════════════════════════════════
+   RTL — Overrides directionnels pour l'arabe
+   ══════════════════════════════════════════════════ */
+
+html {
+  direction: rtl;
+}
+
+/* Icônes directionnelles — miroir en RTL */
+[dir="rtl"] .icon-arrow-left,
+[dir="rtl"] .icon-arrow-right,
+[dir="rtl"] .icon-chevron-left,
+[dir="rtl"] .icon-chevron-right,
+[dir="rtl"] .icon-arrow-back,
+[dir="rtl"] .icon-arrow-forward,
+[dir="rtl"] .icon-undo,
+[dir="rtl"] .icon-redo {
+  transform: scaleX(-1);
+}
+
+/* Timer — toujours en LTR pour les chiffres */
+.timer {
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+/* Inputs avec icônes — inverser padding */
+[dir="rtl"] .input-with-icon {
+  padding-right: 44px;
+  padding-left: 16px;
+}
+[dir="rtl"] .input-icon-left {
+  right: 14px;
+  left: auto;
+}
+
+/* Navigation en miroir pour les indicateurs de retour */
+[dir="rtl"] .back-icon {
+  transform: scaleX(-1);
+}
+
+/* Progress bar */
+[dir="rtl"] .progress-fill {
+  transform-origin: right center;
+}
+
+/* Boutons de fermeture — côté gauche en RTL */
+[dir="rtl"] .modal-close,
+[dir="rtl"] .drawer-close {
+  left: 16px;
+  right: auto;
+}
+
+/* Bordure des cartes — pas de bordure côté gutter en RTL */
+[dir="rtl"] .card-sidebar {
+  border-right: none;
+  border-left: 1px solid var(--border-default);
+}
