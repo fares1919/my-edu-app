@@ -8,40 +8,32 @@ import { LEVELS, LEVEL_LABELS } from '../constants/levels';
 import { ALL_SUBJECTS, SUBJECT_LABELS } from '../constants/subjects';
 import { generateId } from '../utils/ids';
 import { nowISO } from '../utils/dates';
+import { NewQuizForm } from '../components/ui/NewQuizForm';
+import { NewQuestionForm } from '../components/ui/NewQuestionForm';
 import type { Quiz } from '../types/quiz';
 import type { Question } from '../types/question';
-import type { Level, Subject } from '../types/subject';
-
-const QUESTION_DURATIONS = [15, 20, 30, 45, 60, 90, 120];
 
 export function QuizManagePage() {
   const navigate = useNavigate();
   const activeProfile = useProfilesStore((s) => s.activeProfile);
+
+  // Data
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [questionsLoading, setQuestionsLoading] = useState(false);
+
+  // UI state
   const [showNewQuizForm, setShowNewQuizForm] = useState(false);
   const [showNewQuestion, setShowNewQuestion] = useState(false);
-
-  // Filters
-  const [filterLevel, setFilterLevel] = useState<string>('');
-  const [filterSubject, setFilterSubject] = useState<string>('');
-
-  // New quiz form
-  const [newQuiz, setNewQuiz] = useState({ title: '', level: '4_متوسط' as Level, subject: 'الرياضيات' as Subject });
-  // New question form
-  const [newQuestion, setNewQuestion] = useState({
-    text: '',
-    choice1: '', choice2: '', choice3: '', choice4: '',
-    correctAnswer: '',
-    explanation: '',
-    duration: 30,
-  });
+  const [filterLevel, setFilterLevel] = useState('');
+  const [filterSubject, setFilterSubject] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleteQConfirm, setDeleteQConfirm] = useState<string | null>(null);
   const [seedMessage, setSeedMessage] = useState<string | null>(null);
+
+  // ── Data loading ────────────────────────────────────────────
 
   const loadQuizzes = async () => {
     try {
@@ -57,34 +49,15 @@ export function QuizManagePage() {
 
   useEffect(() => { loadQuizzes(); }, []);
 
+  // ── Filtered list ───────────────────────────────────────────
+
   const filteredQuizzes = quizzes.filter(q => {
     if (filterLevel && q.level !== filterLevel) return false;
     if (filterSubject && q.subject !== filterSubject) return false;
     return true;
   });
 
-  const handleCreateQuiz = async () => {
-    if (!newQuiz.title.trim()) return;
-    try {
-      const quiz: Quiz = {
-        id: generateId(),
-        title: newQuiz.title.trim(),
-        level: newQuiz.level,
-        subject: newQuiz.subject,
-        questionCount: 0,
-        defaultDuration: 30,
-        status: 'active',
-        createdAt: nowISO(),
-        updatedAt: nowISO(),
-      };
-      await quizRepo.create(quiz);
-      setShowNewQuizForm(false);
-      setNewQuiz({ title: '', level: '4_متوسط' as Level, subject: 'الرياضيات' as Subject });
-      await loadQuizzes();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // ── Handlers ────────────────────────────────────────────────
 
   const handleDeleteQuiz = async (id: string) => {
     try {
@@ -118,35 +91,6 @@ export function QuizManagePage() {
     }
   };
 
-  const handleAddQuestion = async () => {
-    const { text, choice1, choice2, choice3, choice4, correctAnswer, explanation, duration } = newQuestion;
-    if (!text.trim() || !choice1.trim() || !choice2.trim() || !choice3.trim() || !choice4.trim() || !correctAnswer.trim()) return;
-    if (!selectedQuiz) return;
-
-    try {
-      const q: Question = {
-        id: generateId(),
-        quizId: selectedQuiz.id,
-        level: selectedQuiz.level,
-        subject: selectedQuiz.subject,
-        text: text.trim(),
-        choices: [choice1.trim(), choice2.trim(), choice3.trim(), choice4.trim()] as [string, string, string, string],
-        correctAnswer: correctAnswer.trim(),
-        explanation: explanation.trim() || undefined,
-        duration: duration as any,
-        order: questions.length + 1,
-      };
-      await questionRepo.create(q);
-      const updatedQuiz = { ...selectedQuiz, questionCount: questions.length + 1, updatedAt: nowISO() };
-      await quizRepo.update(updatedQuiz);
-      setSelectedQuiz(updatedQuiz);
-      setNewQuestion({ text: '', choice1: '', choice2: '', choice3: '', choice4: '', correctAnswer: '', explanation: '', duration: 30 });
-      setQuestions(prev => [...prev, q]);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const handleDeleteQuestion = async (questionId: string) => {
     try {
       await questionRepo.remove(questionId);
@@ -175,6 +119,17 @@ export function QuizManagePage() {
     }
     setTimeout(() => setSeedMessage(null), 5000);
   };
+
+  const handleQuizCreated = () => {
+    loadQuizzes();
+  };
+
+  const handleQuestionAdded = (q: Question) => {
+    setQuestions(prev => [...prev, q]);
+    setSelectedQuiz(prev => prev ? { ...prev, questionCount: prev.questionCount + 1, updatedAt: nowISO() } : prev);
+  };
+
+  // ── Render ──────────────────────────────────────────────────
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }} dir="rtl">
@@ -222,50 +177,14 @@ export function QuizManagePage() {
         </select>
       </div>
 
-      {/* New quiz form */}
-      {showNewQuizForm && (
-        <div className="card" style={{ animation: 'fadeIn 0.3s ease' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px 0' }}>اختبار جديد</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div>
-              <label className="label" style={{ fontSize: '0.8rem', marginBottom: '4px' }}>العنوان</label>
-              <input
-                value={newQuiz.title}
-                onChange={e => setNewQuiz({ ...newQuiz, title: e.target.value })}
-                className="input"
-                placeholder="مثلاً: اختبار الفصل الأول في الرياضيات"
-              />
-            </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <div style={{ flex: 1 }}>
-                <label className="label" style={{ fontSize: '0.8rem', marginBottom: '4px' }}>المستوى</label>
-                <select
-                  value={newQuiz.level}
-                  onChange={e => setNewQuiz({ ...newQuiz, level: e.target.value as Level })}
-                  className="input"
-                >
-                  {LEVELS.map(l => <option key={l} value={l}>{LEVEL_LABELS[l]}</option>)}
-                </select>
-              </div>
-              <div style={{ flex: 1 }}>
-                <label className="label" style={{ fontSize: '0.8rem', marginBottom: '4px' }}>المادة</label>
-                <select
-                  value={newQuiz.subject}
-                  onChange={e => setNewQuiz({ ...newQuiz, subject: e.target.value as Subject })}
-                  className="input"
-                >
-                  {ALL_SUBJECTS.map(s => <option key={s} value={s}>{SUBJECT_LABELS[s]}</option>)}
-                </select>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '8px', paddingTop: '4px' }}>
-              <button className="btn btn-primary btn-sm" onClick={handleCreateQuiz}>إنشاء</button>
-              <button className="btn btn-ghost btn-sm" onClick={() => setShowNewQuizForm(false)}>إلغاء</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* New Quiz Form */}
+      <NewQuizForm
+        show={showNewQuizForm}
+        onClose={() => setShowNewQuizForm(false)}
+        onCreated={handleQuizCreated}
+      />
 
+      {/* Main Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
         {/* Left: Quiz list */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -305,11 +224,11 @@ export function QuizManagePage() {
                     </p>
                   </div>
                   <button
-                  className="btn-icon"
-                  onClick={e => { e.stopPropagation(); setDeleteConfirm(quiz.id); }}
-                  title="حذف"
-                >
-                  🗑️
+                    className="btn-icon"
+                    onClick={e => { e.stopPropagation(); setDeleteConfirm(quiz.id); }}
+                    title="حذف"
+                  >
+                    🗑️
                   </button>
                 </div>
                 {deleteConfirm === quiz.id && (
@@ -347,79 +266,14 @@ export function QuizManagePage() {
                 </button>
               </div>
 
-              {showNewQuestion && (
-                <div className="card" style={{ background: 'var(--surface-card)', animation: 'fadeIn 0.3s ease', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                    سؤال جديد
-                  </h4>
-                  <div>
-                    <label className="label" style={{ fontSize: '0.8rem', marginBottom: '4px' }}>
-                      نص السؤال
-                    </label>
-                    <textarea
-                      value={newQuestion.text}
-                      onChange={e => setNewQuestion({ ...newQuestion, text: e.target.value })}
-                      className="input"
-                      style={{ resize: 'vertical', minHeight: '60px' }}
-                      rows={2}
-                      placeholder="اكتب السؤال هنا..."
-                    />
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    {(['choice1', 'choice2', 'choice3', 'choice4'] as const).map((key, i) => (
-                      <div key={key}>
-                        <label className="label" style={{ fontSize: '0.8rem', marginBottom: '4px' }}>
-                          اختيار {i + 1}
-                        </label>
-                        <input
-                          value={newQuestion[key]}
-                          onChange={e => setNewQuestion({ ...newQuestion, [key]: e.target.value })}
-                          className="input"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <div style={{ flex: 1 }}>
-                      <label className="label" style={{ fontSize: '0.8rem', marginBottom: '4px' }}>
-                        الإجابة الصحيحة
-                      </label>
-                      <input
-                        value={newQuestion.correctAnswer}
-                        onChange={e => setNewQuestion({ ...newQuestion, correctAnswer: e.target.value })}
-                        className="input"
-                        placeholder="يجب أن تطابق أحد الاختيارات"
-                      />
-                    </div>
-                    <div style={{ width: '100px' }}>
-                      <label className="label" style={{ fontSize: '0.8rem', marginBottom: '4px' }}>
-                        المدة (ث)
-                      </label>
-                      <select
-                        value={newQuestion.duration}
-                        onChange={e => setNewQuestion({ ...newQuestion, duration: Number(e.target.value) })}
-                        className="input"
-                      >
-                        {QUESTION_DURATIONS.map(d => <option key={d} value={d}>{d}s</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="label" style={{ fontSize: '0.8rem', marginBottom: '4px' }}>
-                      شرح (اختياري)
-                    </label>
-                    <input
-                      value={newQuestion.explanation}
-                      onChange={e => setNewQuestion({ ...newQuestion, explanation: e.target.value })}
-                      className="input"
-                    />
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button className="btn btn-primary btn-sm" onClick={handleAddQuestion}>إضافة</button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => setShowNewQuestion(false)}>إلغاء</button>
-                  </div>
-                </div>
-              )}
+              {/* New Question Form */}
+              <NewQuestionForm
+                show={showNewQuestion}
+                onClose={() => setShowNewQuestion(false)}
+                onAdded={handleQuestionAdded}
+                selectedQuiz={selectedQuiz}
+                nextOrder={questions.length + 1}
+              />
 
               {questionsLoading ? (
                 <div style={{ textAlign: 'center', padding: '30px 0' }}>

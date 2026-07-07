@@ -54,6 +54,111 @@ function resolveSubject(rawSubject: string): string {
   return rawSubject;
 }
 
+// ── Field validators ──────────────────────────────────────────
+
+function validateLevel(
+  level: string | undefined,
+  rowIndex: number,
+): CsvValidationError[] {
+  if (!level || !isValidLevel(level)) {
+    return [{ rowIndex, column: 'المستوى', message: `المستوى "${level || '(فارغ)'}" غير معروف` }];
+  }
+  return [];
+}
+
+function validateSubject(
+  subject: string | undefined,
+  level: string | undefined,
+  rowIndex: number,
+): CsvValidationError[] {
+  if (!subject) {
+    return [{ rowIndex, column: 'المادة', message: 'حقل المادة فارغ' }];
+  }
+  if (!isValidSubject(subject)) {
+    return [{ rowIndex, column: 'المادة', message: `المادة "${subject}" غير معروفة` }];
+  }
+  if (level && isValidLevel(level) && !isSubjectForLevel(subject as Subject, level as Level)) {
+    return [{ rowIndex, column: 'المادة', message: `المادة "${subject}" غير متوفرة لهذا المستوى` }];
+  }
+  return [];
+}
+
+function validateQuestion(
+  text: string | undefined,
+  rowIndex: number,
+): CsvValidationError[] {
+  if (!text || text.trim().length === 0) {
+    return [{ rowIndex, column: 'السؤال', message: 'السؤال فارغ' }];
+  }
+  return [];
+}
+
+function validateChoices(
+  choices: (string | undefined)[],
+  rowIndex: number,
+): CsvValidationError[] {
+  const errors: CsvValidationError[] = [];
+  choices.forEach((choice, i) => {
+    if (!choice || choice.trim().length === 0) {
+      errors.push({ rowIndex, column: `اختيار${i + 1}`, message: `الاختيار ${i + 1} فارغ` });
+    }
+  });
+  return errors;
+}
+
+function validateAnswer(
+  answer: string | undefined,
+  choices: (string | undefined)[],
+  rowIndex: number,
+): CsvValidationError[] {
+  if (!answer || answer.trim().length === 0) {
+    return [{ rowIndex, column: 'الإجابة', message: 'حقل الإجابة فارغ' }];
+  }
+  const nonEmptyChoices = choices.filter(c => c && c.trim().length > 0);
+  if (nonEmptyChoices.length > 0 && !nonEmptyChoices.includes(normalizeText(answer))) {
+    return [{ rowIndex, column: 'الإجابة', message: `الإجابة "${answer}" يجب أن تكون واحدة من الاختيارات الأربعة` }];
+  }
+  return [];
+}
+
+function validateDuration(
+  duration: string | undefined,
+  rowIndex: number,
+): CsvValidationError[] {
+  if (duration && duration.trim().length > 0) {
+    const parsed = parseInt(duration, 10);
+    if (isNaN(parsed) || !isValidDuration(parsed)) {
+      return [{ rowIndex, column: 'المدة', message: `المدة "${duration}" يجب أن تكون رقماً صحيحاً موجباً` }];
+    }
+  }
+  return [];
+}
+
+// ── Row validation ────────────────────────────────────────────
+
+function validateRow(row: CsvQuestionRow, rowIndex: number): CsvValidationError[] {
+  // Résoudre les libellés → codes internes
+  const rawLevel = resolveLevel(row.المستوى);
+  const rawSubject = resolveSubject(row.المادة);
+
+  // Mettre à jour la ligne avec les codes résolus
+  row.المستوى = rawLevel;
+  row.المادة = rawSubject;
+
+  const choices = [row.اختيار1, row.اختيار2, row.اختيار3, row.اختيار4];
+
+  return [
+    ...validateLevel(rawLevel, rowIndex),
+    ...validateSubject(rawSubject, rawLevel, rowIndex),
+    ...validateQuestion(row.السؤال, rowIndex),
+    ...validateChoices(choices, rowIndex),
+    ...validateAnswer(row.الإجابة, choices, rowIndex),
+    ...validateDuration(row.المدة, rowIndex),
+  ];
+}
+
+// ── Entry point ───────────────────────────────────────────────
+
 export function validateCsvContent(parseResult: ParseResult): CsvImportResult {
   const preview: CsvPreviewRow[] = [];
   const allErrors: CsvValidationError[] = [...parseResult.errors.map(e => ({
@@ -86,61 +191,4 @@ export function validateCsvContent(parseResult: ParseResult): CsvImportResult {
     preview,
     errors: allErrors,
   };
-}
-
-function validateRow(row: CsvQuestionRow, rowIndex: number): CsvValidationError[] {
-  const errors: CsvValidationError[] = [];
-
-  // Résoudre les libellés → codes internes
-  const rawLevel = resolveLevel(row.المستوى);
-  const rawSubject = resolveSubject(row.المادة);
-
-  // Mettre à jour la ligne avec les codes résolus
-  row.المستوى = rawLevel;
-  row.المادة = rawSubject;
-
-  // المستوى
-  if (!row.المستوى || !isValidLevel(row.المستوى)) {
-    errors.push({ rowIndex, column: 'المستوى', message: `المستوى "${row.المستوى || '(فارغ)'}" غير معروف` });
-  }
-
-  // المادة
-  if (!row.المادة) {
-    errors.push({ rowIndex, column: 'المادة', message: 'حقل المادة فارغ' });
-  } else if (!isValidSubject(row.المادة)) {
-    errors.push({ rowIndex, column: 'المادة', message: `المادة "${row.المادة}" غير معروفة` });
-  } else if (row.المستوى && isValidLevel(row.المستوى) && !isSubjectForLevel(row.المادة as Subject, row.المستوى as Level)) {
-    errors.push({ rowIndex, column: 'المادة', message: `المادة "${row.المادة}" غير متوفرة لهذا المستوى` });
-  }
-
-  // السؤال
-  if (!row.السؤال || row.السؤال.trim().length === 0) {
-    errors.push({ rowIndex, column: 'السؤال', message: 'السؤال فارغ' });
-  }
-
-  // اختيار1-4
-  const choices = [row.اختيار1, row.اختيار2, row.اختيار3, row.اختيار4];
-  choices.forEach((choice, i) => {
-    if (!choice || choice.trim().length === 0) {
-      errors.push({ rowIndex, column: `اختيار${i + 1}`, message: `الاختيار ${i + 1} فارغ` });
-    }
-  });
-
-  // الإجابة
-  const nonEmptyChoices = choices.filter(c => c && c.trim().length > 0);
-  if (!row.الإجابة || row.الإجابة.trim().length === 0) {
-    errors.push({ rowIndex, column: 'الإجابة', message: 'حقل الإجابة فارغ' });
-  } else if (nonEmptyChoices.length > 0 && !nonEmptyChoices.includes(normalizeText(row.الإجابة))) {
-    errors.push({ rowIndex, column: 'الإجابة', message: `الإجابة "${row.الإجابة}" يجب أن تكون واحدة من الاختيارات الأربعة` });
-  }
-
-  // المدة
-  if (row.المدة && row.المدة.trim().length > 0) {
-    const duration = parseInt(row.المدة, 10);
-    if (isNaN(duration) || !isValidDuration(duration)) {
-      errors.push({ rowIndex, column: 'المدة', message: `المدة "${row.المدة}" يجب أن تكون رقماً صحيحاً موجباً` });
-    }
-  }
-
-  return errors;
 }

@@ -32,3 +32,6 @@ dist-ssr
 .mcp.json
 import_memory.sh
 .tmp_memory_val.txt
+.swarm/
+schema.sql
+.oxlintrc.json
