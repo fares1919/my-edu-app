@@ -6,11 +6,12 @@ export function ImportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { preview, importState, importResult, setFile, analyzeFile, executeImport, reset } = useImportStore();
   const [fileName, setFileName] = useState('');
+  const [formatTab, setFormatTab] = useState<'csv' | 'txt'>('csv');
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     setFileName(file.name);
     const reader = new FileReader();
     reader.onload = (evt) => {
@@ -43,7 +44,7 @@ export function ImportPage() {
       <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div>
           <label className="label">
-            اختر ملف CSV
+            اختر ملف (CSV أو TXT)
           </label>
           <input
             ref={fileInputRef}
@@ -55,12 +56,80 @@ export function ImportPage() {
           />
         </div>
 
-        <div className="feedback feedback-info" style={{ fontSize: '0.875rem' }}>
-          <div>
-            <p style={{ fontWeight: 600, margin: '0 0 4px 0' }}>التنسيق المطلوب:</p>
-            <p dir="ltr" style={{ fontFamily: 'monospace', fontSize: '0.8125rem', margin: 0 }}>المستوى; المادة; السؤال; اختيار1; اختيار2; اختيار3; اختيار4; الإجابة; شرح; صورة; المدة</p>
-          </div>
+        {/* Format info tabs */}
+        <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+          <button
+            onClick={() => setFormatTab('csv')}
+            className={`btn btn-sm ${formatTab === 'csv' ? 'btn-primary' : 'btn-ghost'}`}
+          >
+            تنسيق CSV
+          </button>
+          <button
+            onClick={() => setFormatTab('txt')}
+            className={`btn btn-sm ${formatTab === 'txt' ? 'btn-primary' : 'btn-ghost'}`}
+          >
+            تنسيق TXT
+          </button>
         </div>
+
+        {formatTab === 'csv' && (
+          <div className="feedback feedback-info" style={{ fontSize: '0.875rem' }}>
+            <div>
+              <p style={{ fontWeight: 600, margin: '0 0 4px 0' }}>التنسيق المطلوب (CSV):</p>
+              <p dir="ltr" style={{ fontFamily: 'monospace', fontSize: '0.8125rem', margin: 0 }}>المستوى; المادة; السؤال; اختيار1; اختيار2; اختيار3; اختيار4; الإجابة; شرح; صورة; المدة</p>
+            </div>
+          </div>
+        )}
+
+        {formatTab === 'txt' && (
+          <div className="feedback feedback-info" style={{ fontSize: '0.875rem' }}>
+            <div>
+              <p style={{ fontWeight: 600, margin: '0 0 4px 0' }}>التنسيق المطلوب (TXT):</p>
+              <pre dir="rtl" style={{
+                fontFamily: 'monospace',
+                fontSize: '0.8125rem',
+                margin: 0,
+                whiteSpace: 'pre-wrap',
+                direction: 'rtl',
+                textAlign: 'right',
+                lineHeight: 1.6,
+              }}>
+{`المستوى: السنة الرابعة متوسط
+المادة: علوم الطبيعة والحياة
+
+ما هو مصدر الطاقة الرئيسي على الأرض؟
+أ. الشمس
+ب. القمر
+ج. الرياح
+د. المياه
+الإجابة: الشمس
+الشرح: الشمس هي مصدر الطاقة الرئيسي
+
+---
+
+المستوى: السنة الثالثة متوسط
+المادة: اللغة العربية
+
+ما معنى كلمة العلم؟
+أ. الجهل
+ب. المعرفة
+ج. الظن
+د. الشك
+الإجابة: المعرفة
+الشرح: العلم هو المعرفة والإدراك`}
+              </pre>
+              <ul style={{ fontSize: '0.8125rem', margin: '8px 0 0 0', paddingRight: '20px' }}>
+                <li>كل سؤال في مجموعة مستقلة</li>
+                <li>تفصل المجموعات بخط <code dir="ltr">---</code> أو سطر فارغ</li>
+                <li>الأسطر التي تبدأ بـ <code>#</code> تُعتبر تعليقات ويتم تجاهلها</li>
+                <li>بيانات <code>المستوى:</code> و <code>المادة:</code> اختيارية وتُورث للمجموعة التالية</li>
+                <li>الاختيارات تبدأ بـ <code>أ.</code> <code>ب.</code> <code>ج.</code> <code>د.</code></li>
+                <li>الإجابة: النص المطابق لأحد الاختيارات</li>
+                <li>الشرح: اختياري</li>
+              </ul>
+            </div>
+          </div>
+        )}
 
         {fileName && !preview && (
           <button onClick={handleAnalyze} className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>

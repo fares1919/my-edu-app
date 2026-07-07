@@ -509,12 +509,12 @@ export function ResultPage() {
               transition: 'background 0.2s ease, border-color 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLLinkElement).style.background = 'var(--nav-hover-bg)';
-              (e.currentTarget as HTMLLinkElement).style.borderColor = 'var(--accent-primary)';
+              (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)';
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent-primary)';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLLinkElement).style.background = '';
-              (e.currentTarget as HTMLLinkElement).style.borderColor = '';
+              (e.currentTarget as HTMLElement).style.background = '';
+              (e.currentTarget as HTMLElement).style.borderColor = '';
             }}
           >
             مراجعة الإجابات
@@ -534,10 +534,10 @@ export function ResultPage() {
               transition: 'background 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLLinkElement).style.background = 'var(--action-ghost-hover)';
+              (e.currentTarget as HTMLElement).style.background = 'var(--action-ghost-hover)';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLLinkElement).style.background = 'transparent';
+              (e.currentTarget as HTMLElement).style.background = 'transparent';
             }}
           >
             العودة للاختبارات
@@ -563,10 +563,10 @@ export function ResultPage() {
               transition: 'color 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLLinkElement).style.color = 'var(--accent-primary)';
+              (e.currentTarget as HTMLElement).style.color = 'var(--accent-primary)';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLLinkElement).style.color = '';
+              (e.currentTarget as HTMLElement).style.color = '';
             }}
           >
             عرض الإحصائيات
@@ -580,10 +580,10 @@ export function ResultPage() {
               transition: 'color 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLLinkElement).style.color = 'var(--accent-primary)';
+              (e.currentTarget as HTMLElement).style.color = 'var(--accent-primary)';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLLinkElement).style.color = '';
+              (e.currentTarget as HTMLElement).style.color = '';
             }}
           >
             الميداليات

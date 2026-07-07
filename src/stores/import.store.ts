@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { CsvImportResult } from '../types/csv';
 import type { LoadState } from '../types/common';
 import { parseCsvContent } from '../services/csv/parseCsv';
+import { parseTxtContent } from '../services/csv/parseTxt';
 import { validateCsvContent } from '../services/csv/validateCsv';
 import { importCsvFile } from '../services/csv/importCsv';
 
@@ -17,6 +18,10 @@ interface ImportState {
   reset: () => void;
 }
 
+function isTxtFile(fileName: string | null): boolean {
+  return fileName !== null && fileName.toLowerCase().endsWith('.txt');
+}
+
 export const useImportStore = create<ImportState>((set, get) => ({
   csvContent: null,
   fileName: null,
@@ -29,10 +34,11 @@ export const useImportStore = create<ImportState>((set, get) => ({
   },
 
   analyzeFile: () => {
-    const { csvContent } = get();
+    const { csvContent, fileName } = get();
     if (!csvContent) return;
-    
-    const parseResult = parseCsvContent(csvContent);
+
+    const isTxt = isTxtFile(fileName);
+    const parseResult = isTxt ? parseTxtContent(csvContent) : parseCsvContent(csvContent);
     const validationResult = validateCsvContent(parseResult);
     set({ preview: validationResult, importState: validationResult.errors.length > 0 ? 'error' : 'success' });
   },
@@ -40,7 +46,7 @@ export const useImportStore = create<ImportState>((set, get) => ({
   executeImport: async () => {
     const { csvContent, fileName } = get();
     if (!csvContent) return;
-    
+
     set({ importState: 'loading' });
     try {
       const result = await importCsvFile(csvContent, fileName || undefined);

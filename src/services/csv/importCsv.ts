@@ -9,6 +9,7 @@ import { isValidDuration } from '../../utils/guards';
 import { DEFAULT_DURATIONS } from '../../constants/durations';
 import { CYCLE_BY_LEVEL } from '../../constants/levels';
 import { parseCsvContent } from './parseCsv';
+import { parseTxtContent } from './parseTxt';
 import { validateCsvContent } from './validateCsv';
 
 export interface GroupedQuestions {
@@ -80,11 +81,15 @@ export function buildQuizFromGroup(group: GroupedQuestions, sourceFileName?: str
   return { quiz, questions };
 }
 
+function isTxtFile(fileName?: string): boolean {
+  return fileName !== undefined && fileName.toLowerCase().endsWith('.txt');
+}
+
 export async function importCsvFile(
   content: string,
   sourceFileName?: string
 ): Promise<{ success: boolean; importedCount: number; quizCount: number; errors: string[] }> {
-  const parseResult = parseCsvContent(content);
+  const parseResult = isTxtFile(sourceFileName) ? parseTxtContent(content) : parseCsvContent(content);
   if (parseResult.errors.length > 0 && parseResult.rows.length === 0) {
     return { success: false, importedCount: 0, quizCount: 0, errors: parseResult.errors.map(e => e.message) };
   }

@@ -256,15 +256,16 @@ export function ReviewPage() {
   useEffect(() => {
     if (!sessionId) return;
     let cancelled = false;
+    const sid: string = sessionId; // narrowed for async scope
 
     async function load() {
       try {
-        const s = await sessionRepo.getById(sessionId);
+        const s = await sessionRepo.getById(sid);
         if (!s || cancelled) { navigate('/'); return; }
 
         const [q, answers, questions] = await Promise.all([
           quizRepo.getById(s.quizId),
-          getAnswersBySessionId(sessionId),
+          getAnswersBySessionId(sid),
           getQuestionsByQuizIdOrdered(s.quizId),
         ]);
 
