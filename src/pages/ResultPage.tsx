@@ -493,7 +493,7 @@ export function ResultPage() {
           )}
 
           <Link
-            to={answers.length > 0 ? '#' : ROUTES.EXAMS}
+            to={ROUTES.REVIEW(session.id)}
             className="btn btn-ghost"
             style={{
               textAlign: 'center',
@@ -517,7 +517,7 @@ export function ResultPage() {
               (e.currentTarget as HTMLElement).style.borderColor = '';
             }}
           >
-            مراجعة الإجابات
+            📖 مراجعة الإجابات مع الشرح
           </Link>
 
           <Link

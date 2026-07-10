@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { QuizSession } from '../../types/session';
-import type { Profile } from '../../types/profile';
+import type { Quiz } from '../../types/quiz';
+import type { Question } from '../../types/question';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -154,6 +155,111 @@ export async function syncProfileToCloud(profile: {
 }
 
 // ─── Cloud queries ────────────────────────────
+
+export async function getCloudQuizzesByLevelSubject(level: string, subject: string): Promise<Quiz[]> {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('quizzes')
+    .select('*')
+    .eq('level', level)
+    .eq('subject', subject)
+    .eq('status', 'active')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('❌ Erreur chargement cloud quizzes:', error);
+    return [];
+  }
+
+  return (data || []).map((row: any) => ({
+    id: row.id,
+    title: row.title,
+    level: row.level,
+    subject: row.subject,
+    questionCount: row.question_count,
+    defaultDuration: row.default_duration ?? 30,
+    sourceFileName: row.source_file_name ?? undefined,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+}
+
+export async function getCloudSubjectsByLevel(level: string): Promise<string[]> {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('quizzes')
+    .select('subject')
+    .eq('level', level)
+    .eq('status', 'active');
+
+  if (error) {
+    console.error('❌ Erreur chargement cloud subjects:', error);
+    return [];
+  }
+
+  // Déduplication
+  return [...new Set((data || []).map((r: any) => r.subject))].sort();
+}
+
+export async function getCloudQuestionsByQuizId(quizId: string): Promise<Question[]> {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('questions')
+    .select('*')
+    .eq('quiz_id', quizId)
+    .order('order_num', { ascending: true });
+
+  if (error) {
+    console.error('❌ Erreur chargement cloud questions:', error);
+    return [];
+  }
+
+  return (data || []).map((row: any) => ({
+    id: row.id,
+    quizId: row.quiz_id,
+    level: row.level,
+    subject: row.subject,
+    text: row.text,
+    choices: row.choices as [string, string, string, string],
+    correctAnswer: row.correct_answer,
+    explanation: row.explanation ?? undefined,
+    image: row.image ?? undefined,
+    duration: row.duration,
+    order: row.order_num,
+  }));
+}
+
+export async function getCloudQuizzes(): Promise<Quiz[]> {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('quizzes')
+    .select('*')
+    .eq('status', 'active')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('❌ Erreur cloud quizzes:', error);
+    return [];
+  }
+
+  return (data || []).map((row: any) => ({
+    id: row.id,
+    title: row.title,
+    level: row.level,
+    subject: row.subject,
+    questionCount: row.question_count,
+    defaultDuration: row.default_duration ?? 30,
+    sourceFileName: row.source_file_name ?? undefined,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+}
 
 export async function getCloudSessionsByProfileId(profileId: string): Promise<QuizSession[]> {
   if (!supabase) return [];

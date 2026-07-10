@@ -6,6 +6,7 @@ import type { Question } from '../types/question';
 import type { Quiz } from '../types/quiz';
 import { quizRepo } from '../services/db/repositories/quizzes.repo';
 import { questionRepo } from '../services/db/repositories/questions.repo';
+import { getCloudQuestionsByQuizId } from '../services/supabase/sync';
 import type { ShuffledChoice } from '../services/quiz/quiz.shuffle';
 import { useQuizTimer } from '../hooks/useQuizTimer';
 import { AbandonModal } from '../components/modals/AbandonModal';
@@ -53,7 +54,14 @@ export function QuizPage() {
         const qs = await questionRepo
           .getAll()
           .then((all) => all.filter((qs) => qs.quizId === quizId));
-        const sorted = qs.sort((a, b) => a.order - b.order);
+        let sorted = qs.sort((a, b) => a.order - b.order);
+
+        // Si pas de questions en local, essayer le cloud
+        if (sorted.length === 0 && quizId) {
+          const cloudQs = await getCloudQuestionsByQuizId(quizId);
+          if (cloudQs.length > 0) sorted = cloudQs.sort((a, b) => a.order - b.order);
+        }
+
         setQuestions(sorted);
 
         startQuiz(q, sorted, activeProfile.id);
