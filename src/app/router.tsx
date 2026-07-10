@@ -12,6 +12,7 @@ import { QuizManagePage } from '../pages/QuizManagePage';
 import { ImportPage } from '../pages/ImportPage';
 import { ExportPage } from '../pages/ExportPage';
 import { SettingsPage } from '../pages/SettingsPage';
+import { DashboardPage } from '../pages/DashboardPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 
 export function AppRouter() {
@@ -33,6 +34,7 @@ export function AppRouter() {
       <Route path={ROUTES.IMPORT} element={<ImportPage />} />
       <Route path={ROUTES.EXPORT} element={<ExportPage />} />
       <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
+      <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

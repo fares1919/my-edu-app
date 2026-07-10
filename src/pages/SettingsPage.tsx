@@ -1,5 +1,6 @@
 import { useUiStore } from '../stores/ui.store';
 import { Card } from '../components/ui/Card';
+import { isSupabaseConfigured } from '../services/supabase/client';
 
 type ThemeOption = 'light' | 'dark' | 'high-contrast';
 type FontOption = 'normal' | 'large' | 'dyslexic';
@@ -116,6 +117,65 @@ export function SettingsPage() {
               <div className="text-lg mb-1" aria-hidden="true">🔇</div>
               معطّلة
             </button>
+          </div>
+        </div>
+      </Card>
+
+      {/* Supabase cloud */}
+      <Card>
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>☁️ المزامنة السحابية</h3>
+            <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>تتبع تطور الأطفال عبر الإنترنت مع Supabase</p>
+          </div>
+          <div
+            className="p-3 rounded-lg text-sm"
+            style={{
+              background: isSupabaseConfigured() ? 'color-mix(in srgb, var(--success-text, #28a745) 10%, transparent)' : 'color-mix(in srgb, var(--warning-text, #e67e22) 10%, transparent)',
+              border: '1px solid ' + (isSupabaseConfigured() ? 'var(--success-text, #28a745)' : 'var(--warning-text, #e67e22)'),
+              borderRadius: 'var(--radius-md, 8px)',
+            }}
+          >
+            {isSupabaseConfigured() ? (
+              <span style={{ color: 'var(--success-text, #28a745)', fontWeight: 500 }}>
+                ✅ Supabase connecté — les résultats se synchronisent automatiquement vers le cloud.
+              </span>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ color: 'var(--warning-text, #e67e22)', fontWeight: 500 }}>
+                  ⚠️ Supabase non configuré. Les données restent locales.
+                </span>
+                <details>
+                  <summary style={{ cursor: 'pointer', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                    📋 Voir les instructions de configuration
+                  </summary>
+                  <div style={{ marginTop: '12px', fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.6, direction: 'ltr', textAlign: 'left' }}>
+                    <ol style={{ paddingLeft: '20px' }}>
+                      <li>Crée un compte gratuit sur <strong>supabase.com</strong></li>
+                      <li>Crée un nouveau projet</li>
+                      <li>Va dans <strong>SQL Editor</strong> et exécute le fichier <code>src/services/supabase/migration.sql</code></li>
+                      <li>Va dans <strong>Settings → API</strong> et copie le <code>Project URL</code> + <code>anon public key</code></li>
+                      <li>Ajoute ces variables dans le fichier <code>.env</code> du projet :</li>
+                    </ol>
+                    <pre style={{
+                      background: 'var(--surface-page)',
+                      padding: '12px',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      direction: 'ltr',
+                      textAlign: 'left',
+                      marginTop: '8px',
+                    }}>
+{`VITE_SUPABASE_URL=https://xxxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...`}
+                    </pre>
+                    <p style={{ marginTop: '8px' }}>
+                      Pour Vercel : ajoute ces variables dans <strong>Settings → Environment Variables</strong> et redéploie.
+                    </p>
+                  </div>
+                </details>
+              </div>
+            )}
           </div>
         </div>
       </Card>

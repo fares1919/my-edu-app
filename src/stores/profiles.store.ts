@@ -3,6 +3,7 @@ import type { Profile, ProfileFormData } from '../types/profile';
 import { profileRepo, getActiveProfile, setActiveProfile } from '../services/db/repositories/profiles.repo';
 import { generateId } from '../utils/ids';
 import { nowISO } from '../utils/dates';
+import { syncProfileToCloud } from '../services/supabase/sync';
 
 interface ProfilesState {
   profiles: Profile[];
@@ -58,6 +59,8 @@ export const useProfilesStore = create<ProfilesState>((set, get) => ({
     if (profile.isActive) {
       set({ activeProfile: profile });
     }
+    // Sync to cloud
+    syncProfileToCloud(profile);
     return profile;
   },
 

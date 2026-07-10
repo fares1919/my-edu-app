@@ -34,4 +34,10 @@ import_memory.sh
 .tmp_memory_val.txt
 .swarm/
 schema.sql
-.oxlintrc.json
+|.oxlintrc.json
+
+# Env files
+.env
+
+# IDE cache
+.understand-anything/

@@ -14,4 +14,5 @@ export const ROUTES = {
   IMPORT: '/import',
   EXPORT: '/export',
   SETTINGS: '/settings',
+  DASHBOARD: '/dashboard',
 } as const;

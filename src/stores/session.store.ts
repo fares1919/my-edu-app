@@ -4,6 +4,7 @@ import type { Question } from '../types/question';
 import type { Quiz } from '../types/quiz';
 import { getDb } from '../services/db/db';
 import { createQuizEngine, answerQuestion, getCurrentQuestion, getCurrentShuffledChoices, type QuizEngineState } from '../services/quiz/quiz.engine';
+import { syncSessionToCloud } from '../services/supabase/sync';
 import type { ShuffledChoice } from '../services/quiz/quiz.shuffle';
 
 interface SessionState {
@@ -57,6 +58,9 @@ export const useSessionStore = create<SessionState>((set, get) => ({
       await tx.objectStore('answers').add(answer);
     }
     await tx.done;
+
+    // Sync to Supabase cloud (fire & forget)
+    syncSessionToCloud(engine.session, engine.answers);
 
     return engine.session;
   },
