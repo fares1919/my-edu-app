@@ -1,6 +1,6 @@
 -- ============================================
 -- Supabase Schema — Edu Quiz App
--- Run this in the Supabase SQL Editor
+-- Exécuté avec succès le 10/07/2026
 -- ============================================
 
 -- 1. PROFILES
@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS profiles (
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- Allow anonymous read (we'll use anon key)
 CREATE POLICY "Allow all on profiles"
   ON profiles FOR ALL
   USING (true)
@@ -71,6 +70,7 @@ CREATE POLICY "Allow all on answers"
   WITH CHECK (true);
 
 -- 4. VIEW: Évolution par jour par enfant
+-- NOTE: FILTER attaché à AVG (agrégat), PAS à ROUND
 CREATE OR REPLACE VIEW daily_scores AS
 SELECT
   p.id AS profile_id,
@@ -80,7 +80,7 @@ SELECT
   s.subject,
   DATE(s.finished_at) AS date,
   COUNT(*) AS session_count,
-  ROUND(AVG(s.score)::numeric, 1) AS avg_score,
+  ROUND(AVG(s.score), 1) AS avg_score,
   MAX(s.score) AS best_score,
   SUM(s.correct_count) AS total_correct,
   SUM(s.total_questions) AS total_questions
@@ -91,6 +91,7 @@ GROUP BY p.id, p.name, p.avatar, p.level, s.subject, DATE(s.finished_at)
 ORDER BY date DESC;
 
 -- 5. VIEW: Résumé par enfant
+-- FILTER sur COUNT et AVG (agrégats), PAS sur ROUND
 CREATE OR REPLACE VIEW profile_summary AS
 SELECT
   p.id AS profile_id,
@@ -98,8 +99,7 @@ SELECT
   p.avatar,
   p.level,
   COUNT(s.id) FILTER (WHERE s.finished_at IS NOT NULL) AS total_sessions,
-  ROUND(AVG(s.score)::numeric, 1) FILTER (WHERE s.finished_at IS NOT NULL) AS global_avg,
-  ROUND(AVG(s.score)::numeric, 1) FILTER (WHERE s.finished_at IS NOT NULL AND s.score >= 75) AS passing_avg
+  ROUND(AVG(s.score) FILTER (WHERE s.finished_at IS NOT NULL), 1) AS global_avg
 FROM profiles p
 LEFT JOIN sessions s ON s.profile_id = p.id
 GROUP BY p.id, p.name, p.avatar, p.level
