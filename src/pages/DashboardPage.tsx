@@ -256,7 +256,7 @@ function KidCard({
     : kid.sessions.filter(s => s.subject === selectedSubject);
 
   const filteredAvg = filteredSessions.length > 0
-    ? Math.round(filteredSessions.reduce((a, b) => a + b, 0) / filteredSessions.length)
+    ? Math.round(filteredSessions.reduce((a, b) => a + b.score, 0) / filteredSessions.length)
     : 0;
 
   const scoreColor = filteredAvg >= 75 ? 'var(--success-text, #28a745)'
